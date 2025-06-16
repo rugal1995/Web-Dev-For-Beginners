@@ -1,0 +1,13 @@
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+.highlight {
+    background-color: yellow;
+}
+
+.error {
+    background-color: lightcoral;
+    color: red;
+}
