@@ -28,10 +28,6 @@ li {
     justify-content: space-between;
 }
 
-li.completed {
-    text-decoration: line-through;
-    color: gray;
-}
 
 button {
     margin-left: 8px;
@@ -45,9 +41,7 @@ button {
     /* transform: translateX(-50%); */
 }
 
-.done {
-    text-decoration: line-through;
-}
+
 
 li {
     display: flex;
@@ -113,6 +107,7 @@ button:hover {
 }
 
 #filters button {
+    flex: 1;
     width: 100%;
     text-align: center;
     background-color: #dfe6e9;

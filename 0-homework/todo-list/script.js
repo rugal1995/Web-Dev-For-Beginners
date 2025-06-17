@@ -4,6 +4,15 @@ const addButton = document.getElementById('add-btn');
 
 let todos = [];
 
+// 加载localstorage内容
+window.onload = () => {
+    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
+    todos = saved;
+    todos.forEach((todo) => {
+        createTodoItem(todo.text, todo.completed);
+    })
+}
+
 /**
  * 查询
  */
@@ -116,15 +125,6 @@ function createTodoItem(text, completed = false) {
 
 }
 
-// 加载localstorage内容
-window.onload = () => {
-    const saved = JSON.parse(localStorage.getItem(STORAGE_KEY)) || [];
-    todos = saved;
-    todos.forEach((todo) => {
-        createTodoItem(todo.text, todo.completed);
-    })
-}
-
 /**
  * 保存local storage
  */
@@ -154,8 +154,8 @@ function checkDuplicate(todoText) {
         return true;
     }
     // 检查待办事项是否已存在
-    const spanlist = todoList.querySelectorAll('li span');
-    for (const span of spanlist) {
+    const spanList = todoList.querySelectorAll('li span');
+    for (const span of spanList) {
         if (span.textContent === todoText) {
             showMessage();
             input.value = ''; // 清空输入框
