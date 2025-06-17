@@ -48,3 +48,82 @@ button {
 .done {
     text-decoration: line-through;
 }
+
+li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: #f5f5f5;
+    padding: 10px;
+    margin: 5px 0;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+li:hover {
+    transform: scale(1.02);
+    background-color: #e0ffe0;
+}
+
+.done {
+    text-decoration: line-through;
+    color: gray;
+}
+
+button {
+    margin-left: 10px;
+    cursor: pointer;
+    border: none;
+    padding: 5px 10px;
+    background-color: #007bff;
+    color: white;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+}
+
+button:hover {
+    background-color: #0056b3;
+}
+
+#filters button {
+    margin: 5px;
+    padding: 5px 10px;
+    background-color: #ddd;
+}
+
+#filters button:hover {
+    background-color: #ccc;
+}
+
+#clear-all {
+    background-color: #e74c3c;
+    color: white;
+}
+
+#clear-all:hover {
+    background-color: #c0392b;
+}
+
+/* Vertical Filter Buttons */
+#filters {
+    display: flex;
+    flex-direction: row;
+    gap: 8px;
+    margin-bottom: 15px;
+}
+
+#filters button {
+    width: 100%;
+    text-align: center;
+    background-color: #dfe6e9;
+    color: #2d3436;
+}
+
+#filters button:hover {
+    background-color: #b2bec3;
+}
+
+#filters button.active {
+    background-color: #3498db;
+    color: white;
+}

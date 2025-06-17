@@ -10,12 +10,12 @@
 
 <body>
 	<div id="message-box" style="display: none; background: #ffd; padding: 10px; border: 1px solid #ccc;"></div>
-	<div id="filters">
-		<button data-filter='all'>全部</button>
-		<button data-filter='active'>未完成</button>
-		<button data-filter='completed'>已完成</button>
-	</div>
 	<div class="todo-container">
+		<div id="filters">
+			<button data-filter='all'>全部</button>
+			<button data-filter='active'>未完成</button>
+			<button data-filter='completed'>已完成</button>
+		</div>
 		<h1>Todo List</h1>
 		<input type="text" id="todo-input" placeholder="Add a new todo" required>
 		<button id="add-btn">Add</button>
