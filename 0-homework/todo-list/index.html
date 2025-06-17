@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<title>Todo List</title>
+	<meta charset="UTF-8">
+	<link rel="stylesheet" href="style.css">
+	<script src="script.js" defer></script>
+</head>
+
+<body>
+	<div id="message-box" style="display: none; background: #ffd; padding: 10px; border: 1px solid #ccc;"></div>
+	<div id="filters">
+		<button data-filter='all'>全部</button>
+		<button data-filter='active'>未完成</button>
+		<button data-filter='completed'>已完成</button>
+	</div>
+	<div class="todo-container">
+		<h1>Todo List</h1>
+		<input type="text" id="todo-input" placeholder="Add a new todo" required>
+		<button id="add-btn">Add</button>
+		<button id="clear-all">清空</button>
+		<ul id="todo-list"></ul>
+	</div>
+</body>
+
+</html>

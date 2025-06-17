@@ -54,9 +54,9 @@ document.getElementById('typed-value').addEventListener('input', () => {
 
     if (typedvalue === curWord && wordIndex === words.length - 1) {
         let endTime = new Date().getTime();
-        console.log(startTime)
+            console.log(startTime)
 
-        console.log(endTime)
+            console.log(endTime)
 
         const seconds = (endTime - startTime) / 1000;
         const msg = `恭喜你,输入正确,用时:${seconds}秒`;
