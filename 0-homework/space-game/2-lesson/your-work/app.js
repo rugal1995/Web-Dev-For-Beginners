@@ -34,11 +34,22 @@ class Hero extends GameObject {
         this.height = 50;
         this.cooldown = 0;
     }
+
     canFire() {
         return this.cooldown === 0;
     }
-    fire() {
 
+    fire() {
+        // 创建激光
+        gameObjects.push(new Laser(this.x + 45, this.y - 10));
+        this.cooldown = 200;
+        let id = setInterval(() => {
+            if (this.cooldown > 0) {
+                this.cooldown -= 100;
+            } else {
+                clearInterval(id);
+            }
+        }, 200);
     }
 
 }
@@ -50,6 +61,7 @@ class Enemy extends GameObject {
         this.type = 'Enemy';
         this.width = 98;
         this.height = 50;
+        this.dead = false;
         // 定期移动
         let id = setInterval(() => {
             if (this.y < canvas.height - this.height) {
@@ -59,6 +71,25 @@ class Enemy extends GameObject {
                 clearInterval(id);
             }
         }, 200);
+    }
+}
+
+// 激光
+class Laser extends GameObject {
+    constructor(x, y) {
+        super(x, y);
+        this.width = 9;
+        this.height = 33;
+        this.type = 'Laser';
+        this.img = laserImg;
+        let id = setInterval(() => {
+            if (this.y > 0) {
+                this.y -= 15;
+            } else {
+                this.dead = true;
+                clearInterval(id);
+            }
+        }, 100)
     }
 }
 
@@ -115,8 +146,6 @@ let heroImg,
 
 // ------------------事件--------------------------
 function onKeyDown(e) {
-    console.log(e.key);
-    console.log(e.code);
     switch (e.keyCode) {
         case 37:
         case 39:
@@ -134,6 +163,20 @@ window.addEventListener('keydown', onKeyDown);
 
 // 移动英雄
 window.addEventListener('keyup', (e) => {
+    if (e.key === "ArrowUp") {
+        eventEmitter.emit(Messages.KEY_EVENT_UP);
+    } else if (e.key === "ArrowDown") {
+        eventEmitter.emit(Messages.KEY_EVENT_DOWN);
+    } else if (e.key === "ArrowLeft") {
+        eventEmitter.emit(Messages.KEY_EVENT_LEFT);
+    } else if (e.key === "ArrowRight") {
+        eventEmitter.emit(Messages.KEY_EVENT_RIGHT);
+    } else if (e.keyCode === 32) {
+        eventEmitter.emit(Messages.KEY_EVENT_SPACE);
+    }
+});
+window.addEventListener('keydown', (e) => {
+    console.log("press");
     if (e.key === "ArrowUp") {
         eventEmitter.emit(Messages.KEY_EVENT_UP);
     } else if (e.key === "ArrowDown") {
@@ -179,45 +222,30 @@ function initGame() {
 
     // 加载英雄移动指令
     eventEmitter.on(Messages.KEY_EVENT_UP, () => {
-        hero.y -= 5;
+        hero.y -= 15;
     })
     eventEmitter.on(Messages.KEY_EVENT_DOWN, () => {
-        hero.y += 5;
+        hero.y += 15;
     })
     eventEmitter.on(Messages.KEY_EVENT_LEFT, () => {
-        hero.x -= 5;
+        hero.x -= 15;
     })
     eventEmitter.on(Messages.KEY_EVENT_RIGHT, () => {
-        hero.x += 5;
+        hero.x += 15;
     })
     eventEmitter.on(Messages.KEY_EVENT_SPACE, () => {
         if (hero.canFire()) {
             hero.fire();
         }
     })
-
-}
-
-window.onload = async () => {
-    canvas = document.getElementById('canvas')
-    ctx = canvas.getContext('2d')
-    // TODO load textures
-    heroImg = await loadTexture('/assets/player.png');
-    enemyImg = await loadTexture('/assets/enemyShip.png')
-
-    initGame();
-    start();
-}
-
-function start() {
-    const gameLoop = () => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "black";
-        drawGameObjects(ctx);
-        // 关键点：requestAnimationFrame 实现平滑动画
-        requestAnimationFrame(gameLoop);
-    }
-    gameLoop();
+    eventEmitter.on(Messages.COLLISION_ENEMY_LASER, (_, {first, second}) => {
+        first.dead = true;
+        second.dead = true;
+    });
+    eventEmitter.on(Messages.COLLISION_ENEMY_HERO, (_, {enemy}) => {
+        enemy.dead = true;
+        // todo 英雄扣血
+    })
 }
 
 function drawGameObjects(ctx) {
@@ -234,6 +262,59 @@ function intersectRect(r1, r2) {
         r2.right < r1.left
     );
 }
+
+window.onload = async () => {
+    canvas = document.getElementById('canvas')
+    ctx = canvas.getContext('2d')
+    // TODO load textures
+    heroImg = await loadTexture('/assets/player.png');
+    enemyImg = await loadTexture('/assets/enemyShip.png');
+    laserImg = await loadTexture('/assets/laserRed.png');
+
+    initGame();
+    start();
+}
+
+function start() {
+    const gameLoop = (() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = "black";
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        updateGameObjects();
+        drawGameObjects(ctx);
+        requestAnimationFrame(gameLoop);
+
+    });
+    gameLoop();
+}
+
+
+function updateGameObjects() {
+    const enemies = gameObjects.filter(x => x.type === 'Enemy');
+    const lasers = gameObjects.filter(x => x.type === 'Laser');
+
+    enemies.forEach(e => {
+        console.log(e.rectFromGameObject(), hero.rectFromGameObject());
+        if (intersectRect(e.rectFromGameObject(), hero.rectFromGameObject())) {
+            eventEmitter.emit(Messages.COLLISION_ENEMY_HERO, {e});
+        }
+    })
+
+    for (let enemy of enemies) {
+        for (let laser of lasers) {
+            if (intersectRect(enemy.rectFromGameObject(), laser.rectFromGameObject())) {
+                console.log("敌人，激光")
+                eventEmitter.emit(Messages.COLLISION_ENEMY_LASER, ({
+                    first: enemy,
+                    second: laser,
+                }));
+            }
+        }
+    }
+    gameObjects = gameObjects.filter(x => !x.dead);
+}
+
+
 
 
 
