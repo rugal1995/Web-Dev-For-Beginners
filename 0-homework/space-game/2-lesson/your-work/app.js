@@ -33,6 +33,8 @@ class Hero extends GameObject {
         this.width = 98;
         this.height = 50;
         this.cooldown = 0;
+        this.life = 3;
+        this.points = 0;
     }
 
     canFire() {
@@ -50,6 +52,17 @@ class Hero extends GameObject {
                 clearInterval(id);
             }
         }, 200);
+    }
+
+    incrementPoints() {
+        this.points += 100;
+    }
+
+    decrementLife() {
+        this.life -= 1;
+        if (this.life === 0) {
+            this.dead = true;
+        }
     }
 
 }
@@ -111,6 +124,10 @@ class EventEmitter {
             this.listeners[message].forEach(l => l(message, listener));
         }
     }
+
+    clear() {
+        this.listeners = {};
+    }
 }
 
 function loadTexture(path) {
@@ -125,6 +142,7 @@ function loadTexture(path) {
 
 // 消息订阅
 const Messages = {
+    KEY_EVENT_ENTER: 'KEY_EVENT_ENTER',
     KEY_EVENT_UP: "KEY_EVENT_UP",
     KEY_EVENT_DOWN: "KEY_EVENT_DOWN",
     KEY_EVENT_LEFT: "KEY_EVENT_LEFT",
@@ -133,16 +151,21 @@ const Messages = {
     KEY_EVENT_SPACE: "KEY_EVENT_SPACE",
     COLLISION_ENEMY_LASER: "COLLISION_ENEMY_LASER", // 敌人碰撞激光
     COLLISION_ENEMY_HERO: "COLLISION_ENEMY_HERO", // 敌人英雄碰撞
+
+    GAME_END_LOSS: "GAME_END_LOSS",
+    GAME_END_WIN: "GAME_END_WIN",
 }
 
 let heroImg,
     enemyImg,
     laserImg,
+    lifeImg,
     canvas,
     ctx,
     gameObjects = [],
     hero,
-    eventEmitter = new EventEmitter();
+    gameOver = false;
+eventEmitter = new EventEmitter();
 
 // ------------------事件--------------------------
 function onKeyDown(e) {
@@ -173,6 +196,8 @@ window.addEventListener('keyup', (e) => {
         eventEmitter.emit(Messages.KEY_EVENT_RIGHT);
     } else if (e.keyCode === 32) {
         eventEmitter.emit(Messages.KEY_EVENT_SPACE);
+    } else if (e.key === 'Enter') {
+        eventEmitter.emit(Messages.KEY_EVENT_ENTER);
     }
 });
 window.addEventListener('keydown', (e) => {
@@ -241,11 +266,49 @@ function initGame() {
     eventEmitter.on(Messages.COLLISION_ENEMY_LASER, (_, {first, second}) => {
         first.dead = true;
         second.dead = true;
+        hero.incrementPoints();
+        if (isEnemiesDead()) {
+            eventEmitter.emit(Messages.GAME_END_WIN);
+        }
+
     });
+    eventEmitter.on(Messages.GAME_END_WIN, () => {
+        endGame(true);
+    })
+    eventEmitter.on(Messages.GAME_END_LOSS, () => {
+        endGame(false);
+    })
     eventEmitter.on(Messages.COLLISION_ENEMY_HERO, (_, {enemy}) => {
         enemy.dead = true;
         // todo 英雄扣血
-    })
+        hero.decrementLife();
+        console.log(hero.life);
+        if (isHeroDead()) {
+            eventEmitter.emit(Messages.GAME_END_LOSS);
+            return;
+        }
+        if (isEnemiesDead()) {
+            console.log("胜利");
+            gameObjects.emit(Messages.GAME_END_WIN);
+        }
+    });
+    eventEmitter.on(Messages.KEY_EVENT_ENTER, () => resetGame());
+}
+
+function resetGame() {
+    gameOver = false;
+    eventEmitter.clear();
+    initGame();
+    start();
+}
+
+function isHeroDead() {
+    return hero.life <= 0;
+}
+
+function isEnemiesDead() {
+    const enemies = gameObjects.filter((go) => go.type === 'Enemy' && !go.dead);
+    return enemies.length === 0;
 }
 
 function drawGameObjects(ctx) {
@@ -263,6 +326,7 @@ function intersectRect(r1, r2) {
     );
 }
 
+let gameLoopId;
 window.onload = async () => {
     canvas = document.getElementById('canvas')
     ctx = canvas.getContext('2d')
@@ -271,32 +335,42 @@ window.onload = async () => {
     enemyImg = await loadTexture('/assets/enemyShip.png');
     laserImg = await loadTexture('/assets/laserRed.png');
 
+    lifeImg = await loadTexture('/assets/life.png');
     initGame();
     start();
+    console.log("准备停止");
+    // cancelAnimationFrame(gameLoopId);
+    // setTimeout(() => {
+    //     cancelAnimationFrame(gameLoopId);
+    // }, 1000);
+}
+
+function gameLoop() {
+    if (gameOver) {
+        return;
+    }
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+    updateGameObjects();
+    drawLife();
+    drawPoints();
+    drawPoints();
+    drawGameObjects(ctx);
+    gameLoopId = requestAnimationFrame(gameLoop);
 }
 
 function start() {
-    const gameLoop = (() => {
-        ctx.clearRect(0, 0, canvas.width, canvas.height);
-        ctx.fillStyle = "black";
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-        updateGameObjects();
-        drawGameObjects(ctx);
-        requestAnimationFrame(gameLoop);
-
-    });
-    gameLoop();
+    gameLoopId = requestAnimationFrame(gameLoop); // ✅ 启动主循环
 }
-
 
 function updateGameObjects() {
     const enemies = gameObjects.filter(x => x.type === 'Enemy');
     const lasers = gameObjects.filter(x => x.type === 'Laser');
 
     enemies.forEach(e => {
-        console.log(e.rectFromGameObject(), hero.rectFromGameObject());
         if (intersectRect(e.rectFromGameObject(), hero.rectFromGameObject())) {
-            eventEmitter.emit(Messages.COLLISION_ENEMY_HERO, {e});
+            eventEmitter.emit(Messages.COLLISION_ENEMY_HERO, {enemy: e});
         }
     })
 
@@ -312,6 +386,46 @@ function updateGameObjects() {
         }
     }
     gameObjects = gameObjects.filter(x => !x.dead);
+}
+
+function endGame(win) {
+    console.log("en1d........    ..")
+    gameOver = true;
+    console.log('停止：', gameLoopId);
+    cancelAnimationFrame(gameLoopId);
+    console.log("qingli画面")
+    setTimeout(() => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.fillStyle = 'black';
+        console.log("qingli画面1")
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+        if (win) {
+            displayMessage("游戏胜利，恭喜你，通关了");
+        } else {
+            displayMessage("游戏失败，点击Enter，重新开始游戏")
+        }
+    }, 50);
+}
+
+function displayMessage(msg) {
+    ctx.textAlign = 'center';
+    ctx.fillStyle = 'red';
+    ctx.fillText(msg, canvas.width / 2, canvas.height / 2);
+}
+
+function drawLife() {
+    // TODO, 35, 27
+    for (let i = 0; i < hero.life; i++) {
+        const START_POINT = canvas.width - 180;
+        ctx.drawImage(lifeImg, START_POINT + (i + 1) * 45, canvas.height - 37);
+    }
+}
+
+function drawPoints() {
+    ctx.font = '30px Arial';
+    ctx.fillStyle = 'red';
+    ctx.textAlign = 'right';
+    ctx.fillText(hero.points, 80, canvas.height - 20);
 }
 
 
