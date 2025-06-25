@@ -300,6 +300,12 @@ function initGame() {
 	eventEmitter.on(Messages.GAME_END_LOSS, () => {
 		endGame(false);
 	});
+	eventEmitter.on(Messages.KEY_EVENT_ENTER, resetGame());
+}
+
+function restGame() {
+	gameOver = false;
+	ini
 }
 
 function endGame(win) {
