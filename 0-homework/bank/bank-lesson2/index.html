@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width,initial-scale=1.0">
+	<title>BANK APP</title>
+	<script src="app.js" defer></script>
+</head>
+<body>
+	<div id="app">Loading...</div>
+
+	<template id="login">
+		<h1>Bank app</h1>
+		<form>
+			<label for="username">Username</label>
+			<input id="username" name="User" type="text">
+			<button>Login</button>
+		</form>
+	</template>
+
+	<hr/>
+	<h2>Register</h2>
+	<form id = 'registerForm' action="javascript:register()" method="get">
+		<label for="user">Username</label>
+		<input id="user" name="user" type="text" maxlength="3" required>
+		<label for="currency">Currency</label>
+		<input id="currency" name="currency" type="text">
+		<label for="description">Description</label>
+		<input id="description" name="description" type="text">
+		<label for="balance">Current balance</label>
+		<input id="balance" name="balance" type="number" value="" min="1" max="100" required>
+		<button>Register</button>
+	</form>
+
+	<!--	仪表盘-->
+	<template id="dashboard">
+		<header>
+			<h1>Bank app</h1>
+			<a href="/login" onclick="onLinkClick(event)">LogOut</a>
+		</header>
+		<section>
+			Balance:100
+		</section>
+		<section>
+			<h2>Transactions</h2>
+			<table>
+				<thead>
+				<tr>
+					<th>Date</th>
+					<th>Object</th>
+					<th>Amount</th>
+				</tr>
+				</thead>
+			</table>
+		</section>
+	</template>
+</body>
+</html>
