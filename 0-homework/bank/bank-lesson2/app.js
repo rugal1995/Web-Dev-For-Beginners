@@ -72,3 +72,9 @@ async function createAccount(account) {
     }
 
 }
+
+function bb() {
+    return new Promise(resolve => {
+        resolve(1);
+    });
+}
