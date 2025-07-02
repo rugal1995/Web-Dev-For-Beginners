@@ -4,7 +4,7 @@
 	<meta charset="UTF-8">
 	<meta name="viewport" content="width=device-width,initial-scale=1.0">
 	<title>BANK APP</title>
-	<script src="app.js" defer></script>
+	<script type="module" src="app.js" defer></script>
 </head>
 <body>
 	<div id="app">Loading...</div>
@@ -13,18 +13,20 @@
 		<h1>Bank app</h1>
 		<section>
 			<h2>login</h2>
-			<form id="loginForm" action="javascript:login()">
+			<form id="loginForm">
+<!--				  action="javascript:login()">-->
 				<label for="username">Username</label>
 				<input id="username" name="user" type="text">
 				<div id="loginError" role="alert"></div>
-				<button>Login</button>
+				<button type="submit">Login</button>
 			</form>
 		</section>
 	</template>
 
 	<hr/>
 	<h2>Register</h2>
-	<form id='registerForm' action="javascript:register()" method="get">
+	<form id='registerForm' method="get">
+<!--		action="javascript:register()"-->
 		<label for="user">Username</label>
 		<input id="user" name="user" type="text" maxlength="3" required>
 		<label for="currency1">Currency</label>
@@ -33,7 +35,7 @@
 		<input id="description1" name="description" type="text">
 		<label for="balance1">Current balance</label>
 		<input id="balance1" name="balance" type="number" value="" min="1" max="100" required>
-		<button>Register</button>
+		<button type="submit">Register</button>
 	</form>
 
 	<!--	仪表盘-->

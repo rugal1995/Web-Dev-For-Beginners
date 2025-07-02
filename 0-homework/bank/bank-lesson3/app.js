@@ -1,4 +1,8 @@
 // 建立路由
+
+
+import {print1} from "./demo.js";
+
 const routes = {
     '/login': {templateId: 'login'},
     '/dashboard': {templateId: 'dashboard', init: updateDashboard},
@@ -86,10 +90,21 @@ let account;
 // ---------------------------------------------------------------------------
 // Login/register
 // ---------------------------------------------------------------------------
-async function login() {
+document.addEventListener('DOMContentLoaded', () => {
+    const loginForm = document.getElementById('loginForm');
+    if (loginForm) {
+        loginForm.addEventListener('submit', login);
+    }
+    document.getElementById('registerForm').addEventListener('submit', register);
+});
+
+async function login(event) {
+    event.preventDefault();
+    print1();
     const loginForm = document.getElementById('loginForm');
     const user = loginForm.user.value;
     const data = await getAccount(user);
+    console.log('获取用户',data)
     if (data.error) {
         return updateElement('loginError', data.error);
     }
@@ -100,7 +115,6 @@ async function login() {
 
 async function getAccount(user) {
     try {
-        console.log(encodeURIComponent(user))
         const response = await fetch("//localhost:5000/api/accounts/" + encodeURIComponent(user), {
             headers: {'Access-Control-Allow-Origin': "*"}
         });
